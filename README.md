@@ -25,28 +25,46 @@ It wrote the code, ran away, and now the game is unplayable.
 
 ## 📝 Document Your Experience
 
-- [ ] Describe the game's purpose.
-- [ ] Detail which bugs you found.
-- [ ] Explain what fixes you applied.
+- Game Glitch Investigator is a number-guessing game built with Streamlit. You pick a difficulty (Easy, Normal or Hard), guess the secret number, and get "Go higher" or "Go lower" hints. The starter code was AI-generated and contained intentional bugs. The goal of the project was to find them, fix them, and write tests to prove the fixes work.
+- Some bugs that I found were:
+   - Reversed hints: a guess that was too high told the player to go higher, and a guess that was too low told them to go lower.
+   - Secret didn't change with difficulty: the secret was only generated once per session, so switching from Normal to Easy could leave a secret like 70 while the range was 1–20.
+   - New Game didn't clear the game-over state: it only changed the secret, so the "Game over" bar stayed on screen until the page was refreshed. It also ignored the difficulty range, and didn't reset the score or history.
+   - Hardcoded range text: the message always said "between 1 and 100", whatever the difficulty.
+   - Attempts didn't reset when difficulty changed.
+- The fixes I applied were:
+   - Hints: corrected the messages in check_guess. Tests check that "Too High" says go lower and "Too Low" says go higher.
+   - Secret: the app now remembers which difficulty the secret was generated for (secret_difficulty) and regenerates the secret when the difficulty changes. A pytest test using Streamlit's AppTest forces a secret of 70, switches to Easy, and checks the new secret is between 1 and 20.
+   - New Game: it now resets the status, score and history, and picks the secret from the current difficulty's range. A test simulates a lost game, clicks New Game, and checks the "Game over" bar is gone.
+   - Refactor: I moved the game logic out of app.py into logic_utils.py, so it can be tested on its own.
+   (Each fix is marked with a #FIX comment in the code. I checked each test by removing the fix to confirm the test failed.)
 
 ## 📸 Demo Walkthrough
 
 Describe your fixed game in numbered steps so a reader can follow along without watching a video:
 
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
+1. User selects Normal difficulty (range 1–100); the secret is, say, 55
+2. User enters a guess of 40, and the game shows "📈 Go HIGHER!" (Too Low)
+3. User enters a guess of 70, and the game shows "📉 Go LOWER!" (Too High)
+4. User switches to Easy, and the game generates a new secret between 1 and 20
+5. User clicks New Game, and the "Game over" message clears, the score and history reset, and a new secret is picked
+6. User enters the correct guess, and the game shows balloons, "You won!" and the final score, then stops accepting guesses until New Game
+
 
 **Screenshot** *(optional)*: <!-- Insert a screenshot of your fixed, winning game here -->
 
 ## 🧪 Test Results
 
 ```
-# Paste your pytest output here, e.g.:
-# pytest tests/
-# ========================= X passed in 0.XXs =========================
+========================================================================== test session starts ===========================================================================
+platform darwin -- Python 3.14.7, pytest-9.1.1, pluggy-1.6.0
+rootdir: /Users/jolie/Downloads/codepathai110/ai110-module1show-gameglitchinvestigator-starter
+plugins: anyio-4.15.1
+collected 7 items                                                                                                                                                        
+
+tests/test_game_logic.py .......                                                                                                                                   [100%]
+
+=========================================================================== 7 passed in 0.93s ============================================================================
 ```
 
 ## 🚀 Stretch Features
