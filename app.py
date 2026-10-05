@@ -28,6 +28,7 @@ low, high = get_range_for_difficulty(difficulty)
 st.sidebar.caption(f"Range: {low} to {high}")
 st.sidebar.caption(f"Attempts allowed: {attempt_limit}")
 
+#FIX: Now the secret generates/changes based on difficulty mode change, with agent mode
 if "secret" not in st.session_state or st.session_state.get("secret_difficulty") != difficulty:
     st.session_state.secret = random.randint(low, high)
     st.session_state.secret_difficulty = difficulty
@@ -74,9 +75,15 @@ with col2:
 with col3:
     show_hint = st.checkbox("Show hint", value=True)
 
+#FIX: New Game only reset attempts and the secret, so status stayed "lost"/"won"
+# and the "Game over" bar + st.stop() kept the game locked. It now resets status,
+# score, and history too, and draws the secret from the current difficulty's range.
 if new_game:
     st.session_state.attempts = 0
-    st.session_state.secret = random.randint(1, 100)
+    st.session_state.secret = random.randint(low, high)
+    st.session_state.status = "playing"
+    st.session_state.score = 0
+    st.session_state.history = []
     st.success("New game started.")
     st.rerun()
 

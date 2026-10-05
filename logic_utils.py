@@ -25,6 +25,7 @@
 #     """Update score based on outcome and attempt number."""
 #     raise NotImplementedError("Refactor this function from app.py into logic_utils.py")
 
+#FIX: Refactored logic into logic_utils.py using agent mode
 def get_range_for_difficulty(difficulty: str):
     if difficulty == "Easy":
         return 1, 20

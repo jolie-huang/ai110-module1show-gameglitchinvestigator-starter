@@ -47,3 +47,30 @@ def test_secret_regenerates_when_difficulty_changes():
 
     assert 1 <= at.session_state["secret"] <= 20
     assert at.session_state["secret_difficulty"] == "Easy"
+
+
+def test_new_game_clears_game_over_state():
+    # Regression: New Game only changed the secret, so status stayed "lost" and
+    # the "Game over" bar (and st.stop()) persisted until the page was refreshed.
+    from pathlib import Path
+    from streamlit.testing.v1 import AppTest
+
+    app_path = Path(__file__).resolve().parent.parent / "app.py"
+    at = AppTest.from_file(str(app_path), default_timeout=10).run()
+
+    # Simulate a finished game on Easy.
+    at.selectbox[0].select("Easy").run()
+    at.session_state["status"] = "lost"
+    at.session_state["score"] = -15
+    at.session_state["history"] = [3, 7, 9]
+    at.run()
+    assert any("Game over" in e.value for e in at.error)
+
+    next(b for b in at.button if "New Game" in b.label).click().run()
+
+    assert at.session_state["status"] == "playing"
+    assert at.session_state["attempts"] == 0
+    assert at.session_state["score"] == 0
+    assert at.session_state["history"] == []
+    assert 1 <= at.session_state["secret"] <= 20  # respects Easy range
+    assert not any("Game over" in e.value for e in at.error)
